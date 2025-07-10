@@ -14,7 +14,6 @@ class _WebViewPageState extends State<WebViewPage> {
   late final WebViewController controller;
   bool isLoading = true;
   final List<String> _urlHistory = [];
-  String? _urlBeforePrompt;
 
   @override
   void initState() {
@@ -93,35 +92,14 @@ class _WebViewPageState extends State<WebViewPage> {
             cancelText: 'Cancelar',
             showCancelButton: true,
             defaultValue: request.defaultText,
-            onConfirm: (value) async {
+            onConfirm: (value) {
               Navigator.of(dialogContext).pop(value);
-              await showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (_) => CustomJavaScriptDialog(
-                  title: 'Valor ingresado',
-                  message: value ?? '',
-                  type: 'alert',
-                ),
-              );
             },
-            onCancel: () async {
+            onCancel: () {
               Navigator.of(dialogContext).pop(null);
-              await showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (_) => CustomJavaScriptDialog(
-                  title: 'Cancelado',
-                  message: 'Elección cancelada',
-                  type: 'alert',
-                ),
-              );
             },
           ),
         );
-
-        // 💡 Dale tiempo a la WebView para redibujar antes del alert()
-        await Future.delayed(const Duration(milliseconds: 200));
         return result ?? '';
       });
     }

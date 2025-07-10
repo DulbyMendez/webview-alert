@@ -130,7 +130,6 @@ class _CustomJavaScriptDialogState extends State<CustomJavaScriptDialog> {
                 if (widget.onCancel != null) {
                   widget.onCancel!();
                 }
-                Navigator.of(context).pop(false);
               },
               child: Text(widget.cancelText ?? 'Cancelar'),
             ),
@@ -144,7 +143,6 @@ class _CustomJavaScriptDialogState extends State<CustomJavaScriptDialog> {
               if (widget.onConfirm != null) {
                 widget.onConfirm!(value);
               }
-              Navigator.of(context).pop(true);
             },
             child: const Text('Aceptar'),
           ),

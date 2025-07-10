@@ -84,6 +84,7 @@ class _WebViewPageState extends State<WebViewPage> {
         final result = await showDialog<String?>(
           context: context,
           barrierDismissible: false,
+          useSafeArea: false,
           builder: (BuildContext dialogContext) => CustomJavaScriptDialog(
             title: 'Ingrese el valor',
             message: request.message,
@@ -118,6 +119,9 @@ class _WebViewPageState extends State<WebViewPage> {
             },
           ),
         );
+
+        // 💡 Dale tiempo a la WebView para redibujar antes del alert()
+        await Future.delayed(const Duration(milliseconds: 200));
         return result ?? '';
       });
     }
@@ -125,56 +129,41 @@ class _WebViewPageState extends State<WebViewPage> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope<bool>(
-      canPop: _urlHistory.isNotEmpty,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) {
-          return;
-        }
-        if (_urlHistory.length > 1) {
-          _urlHistory.removeLast();
-          final previousUrl = _urlHistory.last;
-          await controller.loadRequest(Uri.parse(previousUrl));
-        } else {
-          Navigator.of(context).pop();
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: const Text('Visor Web'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () async {
-                if (_urlHistory.length > 1) {
-                  // Eliminar la URL actual
-                  _urlHistory.removeLast();
-                  final previousUrl = _urlHistory.last;
-                  await controller.loadRequest(Uri.parse(previousUrl));
-                } else {
-                  // Si no hay historial, no hacer nada o mostrar un mensaje
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('No hay página anterior.')),
-                  );
-                }
-              },
-              tooltip: 'Atrás',
-            ),
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () {
-                controller.reload();
-              },
-            ),
-          ],
-        ),
-        body: Stack(
-          children: [
-            RepaintBoundary(child: WebViewWidget(controller: controller)),
-            if (isLoading) const Center(child: CircularProgressIndicator()),
-          ],
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('Visor Web'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () async {
+              if (_urlHistory.length > 1) {
+                // Eliminar la URL actual
+                _urlHistory.removeLast();
+                final previousUrl = _urlHistory.last;
+                await controller.loadRequest(Uri.parse(previousUrl));
+              } else {
+                // Si no hay historial, no hacer nada o mostrar un mensaje
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('No hay página anterior.')),
+                );
+              }
+            },
+            tooltip: 'Atrás',
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              controller.reload();
+            },
+          ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          WebViewWidget(controller: controller),
+          if (isLoading) const Center(child: CircularProgressIndicator()),
+        ],
       ),
     );
   }
